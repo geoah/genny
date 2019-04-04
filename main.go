@@ -33,11 +33,16 @@ const (
 
 func main() {
 	var (
-		in      = flag.String("in", "", "file to parse instead of stdin")
-		out     = flag.String("out", "", "file to save output to instead of stdout")
-		pkgName = flag.String("pkg", "", "package name for generated files")
-		prefix  = "https://github.com/metabition/gennylib/raw/master/"
+		in             = flag.String("in", "", "file to parse instead of stdin")
+		out            = flag.String("out", "", "file to save output to instead of stdout")
+		pkgName        = flag.String("pkg", "", "package name for generated files")
+		extraImportStr = flag.String("extra-imports", "", "extra imports to be added to the generated file")
+		prefix         = "https://github.com/metabition/gennylib/raw/master/"
 	)
+	extraImports := strings.Split(*extraImportStr, ",")
+	for i := range extraImports {
+		extraImports[i] = fmt.Sprintf(`"%s"`, strings.TrimSpace(extraImports[i]))
+	}
 	flag.Parse()
 	args := flag.Args()
 
@@ -79,7 +84,7 @@ func main() {
 		}
 		r.Body.Close()
 		br := bytes.NewReader(b)
-		err = gen(*in, *pkgName, br, typeSets, outWriter)
+		err = gen(*in, *pkgName, br, typeSets, extraImports, outWriter)
 	} else if len(*in) > 0 {
 		var file *os.File
 		file, err = os.Open(*in)
@@ -87,7 +92,7 @@ func main() {
 			fatal(exitcodeSourceFileInvalid, err)
 		}
 		defer file.Close()
-		err = gen(*in, *pkgName, file, typeSets, outWriter)
+		err = gen(*in, *pkgName, file, typeSets, extraImports, outWriter)
 	} else {
 		var source []byte
 		source, err = ioutil.ReadAll(os.Stdin)
@@ -95,7 +100,7 @@ func main() {
 			fatal(exitcodeStdinFailed, err)
 		}
 		reader := bytes.NewReader(source)
-		err = gen("stdin", *pkgName, reader, typeSets, outWriter)
+		err = gen("stdin", *pkgName, reader, typeSets, extraImports, outWriter)
 	}
 
 	// do the work
@@ -139,12 +144,12 @@ func fatal(code int, a ...interface{}) {
 }
 
 // gen performs the generic generation.
-func gen(filename, pkgName string, in io.ReadSeeker, typesets []map[string]string, out io.Writer) error {
+func gen(filename, pkgName string, in io.ReadSeeker, typesets []map[string]string, extraImports []string, out io.Writer) error {
 
 	var output []byte
 	var err error
 
-	output, err = parse.Generics(filename, pkgName, in, typesets)
+	output, err = parse.Generics(filename, pkgName, in, typesets, extraImports...)
 	if err != nil {
 		return err
 	}
