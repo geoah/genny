@@ -42,9 +42,12 @@ func main() {
 	flag.Parse()
 	args := flag.Args()
 
-	extraImports := strings.Split(*extraImportStr, ",")
-	for i := range extraImports {
-		extraImports[i] = fmt.Sprintf(`"%s"`, strings.TrimSpace(extraImports[i]))
+	extraImports := []string{}
+	if strings.TrimSpace(*extraImportStr) != "" {
+		extraImports = strings.Split(*extraImportStr, ",")
+		for i := range extraImports {
+			extraImports[i] = fmt.Sprintf(`"%s"`, strings.TrimSpace(extraImports[i]))
+		}
 	}
 
 	if len(args) < 2 {
