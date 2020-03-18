@@ -202,10 +202,10 @@ func Generics(filename, pkgName string, in io.ReadSeeker, typeSets []map[string]
 				insideImportBlock = false
 				// HACK to add extra imports once imports have been processed
 				if len(extraImports) > 0 {
-					line += "\n\t" + strings.Join(extraImports, "\n\t")
+					line = strings.Join(extraImports, "\n\t") + "\n\t" + line
 				}
 			}
-			continue
+			// continue
 		}
 
 		if bytes.HasPrefix(scanner.Bytes(), packageKeyword) {
@@ -217,8 +217,9 @@ func Generics(filename, pkgName string, in io.ReadSeeker, typeSets []map[string]
 		} else if bytes.HasPrefix(scanner.Bytes(), importKeyword) {
 			if bytes.HasSuffix(scanner.Bytes(), openBrace) {
 				insideImportBlock = true
+
 			}
-			continue
+			// continue
 		}
 
 		// check all unwantedLinePrefixes - and skip them
@@ -238,7 +239,6 @@ func Generics(filename, pkgName string, in io.ReadSeeker, typeSets []map[string]
 	}
 
 	cleanOutput := strings.Join(cleanOutputLines, "")
-
 	output := []byte(cleanOutput)
 	var err error
 

@@ -36,15 +36,16 @@ func main() {
 		in             = flag.String("in", "", "file to parse instead of stdin")
 		out            = flag.String("out", "", "file to save output to instead of stdout")
 		pkgName        = flag.String("pkg", "", "package name for generated files")
-		extraImportStr = flag.String("extra-imports", "", "extra imports to be added to the generated file")
+		extraImportStr = flag.String("imp", "", "extra imports to be added to the generated file")
 		prefix         = "https://github.com/metabition/gennylib/raw/master/"
 	)
+	flag.Parse()
+	args := flag.Args()
+
 	extraImports := strings.Split(*extraImportStr, ",")
 	for i := range extraImports {
 		extraImports[i] = fmt.Sprintf(`"%s"`, strings.TrimSpace(extraImports[i]))
 	}
-	flag.Parse()
-	args := flag.Args()
 
 	if len(args) < 2 {
 		usage()
